@@ -1,4 +1,4 @@
-import { supabase } from './supabase.js'
+import { supabase } from './supabase.jsx'
 
 /**
  * Typed fetch wrapper for API calls with JWT authentication
@@ -61,6 +61,52 @@ class ApiClient {
   }
 
   /**
+   * Make public API request (no auth required)
+   * @param {string} endpoint - API endpoint (relative to Supabase URL)
+   * @param {RequestInit} options - Fetch options
+   * @returns {Promise<Response>}
+   */
+  async publicRequest(endpoint, options = {}) {
+    const url = `${this.baseUrl}/functions/v1${endpoint}`
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    }
+
+    // Try to add auth token if available (for enrollment status)
+    try {
+      const token = await this.getAuthToken()
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+    } catch {
+      // No auth available, continue without it
+    }
+
+    const config = {
+      ...options,
+      headers,
+    }
+
+    try {
+      const response = await fetch(url, config)
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new ApiError(response.status, errorData.message || response.statusText)
+      }
+      
+      return response
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error
+      }
+      throw new Error(`Network error: ${error.message}`)
+    }
+  }
+
+  /**
    * GET request
    * @param {string} endpoint - API endpoint
    * @param {RequestInit} options - Additional options
@@ -68,6 +114,17 @@ class ApiClient {
    */
   async get(endpoint, options = {}) {
     const response = await this.request(endpoint, { ...options, method: 'GET' })
+    return response.json()
+  }
+
+  /**
+   * Public GET request (no auth required)
+   * @param {string} endpoint - API endpoint
+   * @param {RequestInit} options - Additional options
+   * @returns {Promise<any>}
+   */
+  async publicGet(endpoint, options = {}) {
+    const response = await this.publicRequest(endpoint, { ...options, method: 'GET' })
     return response.json()
   }
 
