@@ -36,7 +36,7 @@ export async function handler(req: Request): Promise<Response> {
     const validatedData = await validateInput(inputData, statsSchema) as z.infer<typeof statsSchema>
 
     // Business logic - fetch statistics
-    const stats = await fetchAdminStats(supabase, validatedData)
+    const stats = await fetchAdminStats(supabase, validatedData, user.id)
 
     // Log audit event
     await logAudit({
@@ -60,7 +60,11 @@ export async function handler(req: Request): Promise<Response> {
 /**
  * Fetch admin statistics from database
  */
-async function fetchAdminStats(supabase: any, params: z.infer<typeof statsSchema>) {
+async function fetchAdminStats(
+  supabase: any,
+  params: z.infer<typeof statsSchema>,
+  adminUserId?: string
+) {
   const { period, start_date, end_date } = params
 
   // Calculate date range for different metrics
@@ -185,6 +189,8 @@ async function fetchAdminStats(supabase: any, params: z.infer<typeof statsSchema
     created_at: event.created_at
   }))
 
+  const securityAlerts = await fetchRecentSecurityAlerts(supabase, adminUserId)
+
   return {
     revenue: {
       mwk: revenue,
@@ -198,7 +204,60 @@ async function fetchAdminStats(supabase: any, params: z.infer<typeof statsSchema
     recent_transactions: recentTransactions,
     activity_feed: activityFeed,
     system_status: 'healthy',
-    security_alerts: 0 // TODO: Implement security alert counting
+    security_alerts: securityAlerts
+  }
+}
+
+/**
+ * Count recent security-relevant audit events
+ */
+async function fetchRecentSecurityAlerts(supabase: any, adminUserId?: string): Promise<number> {
+  const securityEventActions = [
+    'login_failed',
+    'webhook_signature_failed',
+    'payment_mismatch'
+  ]
+
+  const since = new Date(Date.now() - (24 * 60 * 60 * 1000)).toISOString()
+
+  try {
+    const { count, error } = await supabase
+      .from('audit_log')
+      .select('*', { count: 'exact', head: true })
+      .in('action', securityEventActions)
+      .gte('created_at', since)
+
+    if (error) {
+      await logAudit({
+        user_id: adminUserId,
+        event: AUDIT_EVENTS.SYSTEM_ERROR,
+        resource_type: 'admin_dashboard',
+        details: {
+          operation: 'fetch_recent_security_alerts',
+          window_hours: 24,
+          table: 'audit_log',
+          actions: securityEventActions,
+          message: error.message
+        }
+      })
+      return 0
+    }
+
+    return count || 0
+  } catch (error) {
+    await logAudit({
+      user_id: adminUserId,
+      event: AUDIT_EVENTS.SYSTEM_ERROR,
+      resource_type: 'admin_dashboard',
+      details: {
+        operation: 'fetch_recent_security_alerts',
+        window_hours: 24,
+        table: 'audit_log',
+        actions: securityEventActions,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      }
+    })
+    return 0
   }
 }
 
