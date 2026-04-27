@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { api, normalizeApiError } from '../lib/api.jsx'
 
 export function useProgress(videoId, courseId) {
   const [currentTime, setCurrentTime] = useState(0)
@@ -22,24 +23,10 @@ export function useProgress(videoId, courseId) {
       setIsSaving(true)
       setError(null)
 
-      const token = localStorage.getItem('sb-access-token')
-      const response = await fetch('/api/save-progress', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          video_id: videoId,
-          seconds_watched: Math.floor(seconds)
-        })
+      const data = await api.post('/save-progress', {
+        video_id: videoId,
+        seconds_watched: Math.floor(seconds)
       })
-
-      if (!response.ok) {
-        throw new Error('Failed to save progress')
-      }
-
-      const data = await response.json()
       
       // Update completion status
       if (data.progress.completed && !isCompleted) {
@@ -49,7 +36,7 @@ export function useProgress(videoId, courseId) {
       lastSaveTime.current = seconds
 
     } catch (err) {
-      setError(err.message)
+      setError(normalizeApiError(err))
       console.error('Progress save error:', err)
     } finally {
       setIsSaving(false)

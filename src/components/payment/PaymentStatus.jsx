@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { api, normalizeApiError, createNormalizedError, ERROR_TYPES } from '../../lib/api.jsx'
 
 export default function PaymentStatus() {
   const [searchParams] = useSearchParams()
@@ -23,20 +24,8 @@ export default function PaymentStatus() {
 
   const pollPaymentStatus = async () => {
     try {
-      const token = localStorage.getItem('sb-access-token')
-      
       // Initial check
-      const response = await fetch(`/api/payment-status?tx_ref=${txRef}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to check payment status')
-      }
-
-      const data = await response.json()
+      const data = await api.get(`/payment-status?tx_ref=${txRef}`)
       setPaymentData(data)
 
       if (data.status === 'paid') {
@@ -58,7 +47,8 @@ export default function PaymentStatus() {
       }
 
     } catch (err) {
-      setError(err.message)
+      const normalized = normalizeApiError(err)
+      setError(normalized.message)
       setStatus('error')
     }
   }
@@ -66,18 +56,7 @@ export default function PaymentStatus() {
   const startPolling = () => {
     const pollInterval = setInterval(async () => {
       try {
-        const token = localStorage.getItem('sb-access-token')
-        const response = await fetch(`/api/payment-status?tx_ref=${txRef}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
-
-        if (!response.ok) {
-          throw new Error('Failed to check payment status')
-        }
-
-        const data = await response.json()
+        const data = await api.get(`/payment-status?tx_ref=${txRef}`)
         setPaymentData(data)
         setPollCount(prev => prev + 1)
 
@@ -98,7 +77,10 @@ export default function PaymentStatus() {
         } else if (pollCount >= 12) { // 60 seconds timeout
           clearInterval(pollInterval)
           setStatus('failed')
-          setError('Payment verification timed out')
+          setError(createNormalizedError({
+            type: ERROR_TYPES.GENERIC_FAILURE,
+            message: 'Payment verification timed out'
+          }).message)
         }
 
       } catch (err) {
@@ -112,7 +94,10 @@ export default function PaymentStatus() {
       clearInterval(pollInterval)
       if (status === 'loading') {
         setStatus('failed')
-        setError('Payment verification timed out')
+        setError(createNormalizedError({
+          type: ERROR_TYPES.GENERIC_FAILURE,
+          message: 'Payment verification timed out'
+        }).message)
       }
     }, 60000)
   }

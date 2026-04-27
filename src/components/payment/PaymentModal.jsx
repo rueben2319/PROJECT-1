@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { api, normalizeApiError, createNormalizedError, ERROR_TYPES } from '../../lib/api.jsx'
 
 export default function PaymentModal({ course, onClose, onSuccess }) {
   const [state, setState] = useState('idle') // idle, loading, polling, success, failed
@@ -42,24 +43,10 @@ export default function PaymentModal({ course, onClose, onSuccess }) {
       setState('loading')
       setError('')
 
-      const token = localStorage.getItem('sb-access-token')
-      const response = await fetch('/api/create-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          course_id: course.id,
-          phone_number: cleanPhone
-        })
+      const data = await api.post('/create-payment', {
+        course_id: course.id,
+        phone_number: cleanPhone
       })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create payment')
-      }
 
       setTxRef(data.tx_ref)
       
@@ -73,7 +60,8 @@ export default function PaymentModal({ course, onClose, onSuccess }) {
       startPolling(data.tx_ref)
 
     } catch (err) {
-      setError(err.message)
+      const normalized = normalizeApiError(err)
+      setError(normalized.message)
       setState('idle')
     }
   }
@@ -84,18 +72,7 @@ export default function PaymentModal({ course, onClose, onSuccess }) {
     // Poll every 5 seconds for up to 60 seconds (12 attempts)
     pollIntervalRef.current = setInterval(async () => {
       try {
-        const token = localStorage.getItem('sb-access-token')
-        const response = await fetch(`/api/payment-status?tx_ref=${paymentTxRef}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
-
-        const data = await response.json()
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to check payment status')
-        }
+        const data = await api.get(`/payment-status?tx_ref=${paymentTxRef}`)
 
         setPollCount(prev => prev + 1)
 
@@ -130,7 +107,11 @@ export default function PaymentModal({ course, onClose, onSuccess }) {
       clearInterval(pollIntervalRef.current)
       if (state === 'polling') {
         setState('failed')
-        setError('Payment timed out. Please check your phone and try again.')
+        const timeoutError = createNormalizedError({
+          type: ERROR_TYPES.GENERIC_FAILURE,
+          message: 'Payment timed out. Please check your phone and try again.'
+        })
+        setError(timeoutError.message)
       }
     }, 60000)
   }

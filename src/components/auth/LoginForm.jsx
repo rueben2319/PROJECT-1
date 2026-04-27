@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase.jsx'
+import { normalizeAuthError, ERROR_TYPES } from '../../lib/api.jsx'
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -59,12 +60,11 @@ export default function LoginForm() {
       })
 
       if (error) {
-        if (error.message.includes('Invalid login credentials')) {
+        const normalized = normalizeAuthError(error)
+        if (normalized.type === ERROR_TYPES.UNAUTHORIZED) {
           setErrors({ submit: 'Invalid phone/email or password' })
-        } else if (error.message.includes('Email not confirmed')) {
-          setErrors({ submit: 'Please verify your email first' })
         } else {
-          setErrors({ submit: error.message })
+          setErrors({ submit: normalized.message })
         }
         return
       }
