@@ -7,6 +7,15 @@ import Input from '../ui/Input.jsx'
 import Card from '../ui/Card.jsx'
 import Toast from '../ui/Toast.jsx'
 
+function IconField({ icon, children }) {
+  return (
+    <div className="relative">
+      <span className="pointer-events-none absolute left-3 top-[2.3rem] text-base text-muted">{icon}</span>
+      {children}
+    </div>
+  )
+}
+
 export default function LoginForm() {
   const [formData, setFormData] = useState({ identifier: '', password: '' })
   const [errors, setErrors] = useState({})
@@ -56,22 +65,45 @@ export default function LoginForm() {
   }
 
   return (
-    <Card className="mx-auto w-full max-w-md">
+    <Card className="mx-auto w-full max-w-md rounded-2xl p-7 shadow-card">
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold text-primary">Welcome Back</h1>
-        <p className="text-secondary">Sign in to continue learning</p>
+        <p className="mt-1 text-sm text-secondary">Sign in to continue learning</p>
       </div>
       <Toast message={errors.submit} tone="danger" className="mb-4" />
       <form onSubmit={handleSubmit} className="space-y-5">
-        <Input label="Phone Number or Email" value={formData.identifier} onChange={(e) => handleInputChange('identifier', e.target.value)} error={errors.identifier} disabled={loading} placeholder="088 123 4567 or your.email@example.com" />
-        <Input label="Password" type="password" value={formData.password} onChange={(e) => handleInputChange('password', e.target.value)} error={errors.password} disabled={loading} placeholder="Enter your password" />
+        <IconField icon="👤">
+          <Input
+            label="Phone Number or Email"
+            value={formData.identifier}
+            onChange={(e) => handleInputChange('identifier', e.target.value)}
+            error={errors.identifier}
+            hint="Use your registered phone or email"
+            disabled={loading}
+            className="pl-10"
+            placeholder="088 123 4567 or your.email@example.com"
+          />
+        </IconField>
+        <IconField icon="🔒">
+          <Input
+            label="Password"
+            type="password"
+            value={formData.password}
+            onChange={(e) => handleInputChange('password', e.target.value)}
+            error={errors.password}
+            hint="Minimum 6 characters"
+            disabled={loading}
+            className="pl-10"
+            placeholder="Enter your password"
+          />
+        </IconField>
         <div className="flex items-center justify-end text-sm">
-          <Link to="/forgot-password" className="text-primary-600 hover:text-primary-700">Forgot password?</Link>
+          <Link to="/forgot-password" className="font-medium text-primary-600 hover:text-primary-700">Forgot password?</Link>
         </div>
-        <Button type="submit" disabled={loading} className="w-full">{loading ? 'Signing in...' : 'Sign In'}</Button>
+        <Button type="submit" disabled={loading} className="h-12 w-full">{loading ? 'Signing in...' : 'Sign In'}</Button>
       </form>
-      <p className="mt-6 text-center text-secondary">
-        Don't have an account? <Link to="/register" className="font-medium text-primary-600 hover:text-primary-700">Create one</Link>
+      <p className="mt-6 text-center text-sm text-secondary">
+        Don't have an account? <Link to="/register" className="font-semibold text-primary-600 hover:text-primary-700">Create one</Link>
       </p>
     </Card>
   )

@@ -8,6 +8,15 @@ import Input from '../ui/Input.jsx'
 import Card from '../ui/Card.jsx'
 import Toast from '../ui/Toast.jsx'
 
+function IconField({ icon, children }) {
+  return (
+    <div className="relative">
+      <span className="pointer-events-none absolute left-3 top-[2.3rem] text-base text-muted">{icon}</span>
+      {children}
+    </div>
+  )
+}
+
 export default function RegisterForm() {
   const [step, setStep] = useState('form')
   const [formData, setFormData] = useState({ fullName: '', phone: '', email: '', password: '', confirmPassword: '' })
@@ -83,9 +92,9 @@ export default function RegisterForm() {
 
   if (step === 'otp') {
     return (
-      <Card className="mx-auto w-full max-w-md">
+      <Card className="mx-auto w-full max-w-md rounded-2xl p-7 shadow-card">
         <h2 className="mb-2 text-2xl font-bold text-primary">Verify your account</h2>
-        <p className="mb-6 text-secondary">We sent a 6-digit code to {formData.email || formData.phone}</p>
+        <p className="mb-6 text-sm text-secondary">We sent a 6-digit code to {formData.email || formData.phone}</p>
         <Toast message={errors.otp} tone="danger" className="mb-4" />
         <OTPInput onComplete={handleOTPComplete} onResend={handleResendOTP} disabled={loading} />
         <Button variant="ghost" className="mt-6 w-full" onClick={() => setStep('form')} disabled={loading}>← Back to registration</Button>
@@ -94,19 +103,19 @@ export default function RegisterForm() {
   }
 
   return (
-    <Card className="mx-auto w-full max-w-md">
+    <Card className="mx-auto w-full max-w-md rounded-2xl p-7 shadow-card">
       <h1 className="mb-2 text-3xl font-bold text-primary">Join MSCE Learn</h1>
-      <p className="mb-8 text-secondary">Start your learning journey today</p>
+      <p className="mb-8 text-sm text-secondary">Start your learning journey today</p>
       <Toast message={errors.submit} tone="danger" className="mb-4" />
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Input label="Full Name" value={formData.fullName} onChange={(e) => handleInputChange('fullName', e.target.value)} error={errors.fullName} />
-        <Input label="Phone Number" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} error={errors.phone} />
-        <Input label="Email (optional)" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} error={errors.email} />
-        <Input label="Password" type="password" value={formData.password} onChange={(e) => handleInputChange('password', e.target.value)} error={errors.password} />
-        <Input label="Confirm Password" type="password" value={formData.confirmPassword} onChange={(e) => handleInputChange('confirmPassword', e.target.value)} error={errors.confirmPassword} />
-        <Button type="submit" className="w-full" disabled={loading}>{loading ? 'Creating account...' : 'Create account'}</Button>
+        <IconField icon="👤"><Input label="Full Name" value={formData.fullName} onChange={(e) => handleInputChange('fullName', e.target.value)} error={errors.fullName} hint="Use your legal or school name" className="pl-10" /></IconField>
+        <IconField icon="📱"><Input label="Phone Number" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} error={errors.phone} hint="Malawi format: 08x or 09x" className="pl-10" /></IconField>
+        <IconField icon="✉️"><Input label="Email (optional)" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} error={errors.email} hint="Optional backup for account recovery" className="pl-10" /></IconField>
+        <IconField icon="🔐"><Input label="Password" type="password" value={formData.password} onChange={(e) => handleInputChange('password', e.target.value)} error={errors.password} hint="At least 6 characters" className="pl-10" /></IconField>
+        <IconField icon="✅"><Input label="Confirm Password" type="password" value={formData.confirmPassword} onChange={(e) => handleInputChange('confirmPassword', e.target.value)} error={errors.confirmPassword} hint="Must match password" className="pl-10" /></IconField>
+        <Button type="submit" className="h-12 w-full" disabled={loading}>{loading ? 'Creating account...' : 'Create account'}</Button>
       </form>
-      <p className="mt-6 text-center text-secondary">Already have an account? <Link to="/login" className="text-primary-600">Sign in</Link></p>
+      <p className="mt-6 text-center text-sm text-secondary">Already have an account? <Link to="/login" className="font-semibold text-primary-600">Sign in</Link></p>
     </Card>
   )
 }
