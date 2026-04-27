@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import CourseDetail from '../components/courses/CourseDetail.jsx'
 import StudentShell from '../components/student/StudentShell.jsx'
+import Skeleton from '../components/ui/Skeleton.jsx'
+import Card from '../components/ui/Card.jsx'
 import { api } from '../lib/api.jsx'
 
 export default function Course() {
@@ -38,7 +40,17 @@ export default function Course() {
       bottomNav={[{ label: 'Home', to: '/', icon: '🏠' }, { label: 'Course', to: `/course/${id}`, icon: '📘' }]}
     >
       {loading ? (
-        <div className="h-48 animate-pulse rounded-xl bg-gray-200" />
+        <div className="space-y-4">
+          <Card className="space-y-4">
+            <Skeleton className="h-6 w-1/3" />
+            <Skeleton className="h-8 w-2/3" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-4/5" />
+          </Card>
+          <Card className="space-y-3">
+            {[1, 2, 3].map((item) => <Skeleton key={item} className="h-16 w-full" />)}
+          </Card>
+        </div>
       ) : error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
           <p className="mb-3">{error}</p>

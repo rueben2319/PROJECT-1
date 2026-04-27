@@ -6,31 +6,48 @@ import Button from '../ui/Button.jsx'
 export default function CourseCard({ course, onUnlock }) {
   const { id, title, subject, grade, lesson_count, price_mwk, preview_available, is_enrolled, days_remaining } = course
   const isExpired = is_enrolled && days_remaining <= 0
+  const enrollmentState = isExpired ? 'expired' : is_enrolled ? 'active' : 'locked'
+
+  const chip = {
+    active: { label: `${days_remaining} days left`, variant: 'success' },
+    expired: { label: 'Expired', variant: 'danger' },
+    locked: { label: 'Not enrolled', variant: 'warning' }
+  }[enrollmentState]
 
   return (
-    <Card className={`relative overflow-hidden transition-shadow duration-fast hover:shadow-card-hover ${is_enrolled && !isExpired ? 'cursor-pointer' : ''}`}>
-      {!is_enrolled && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="text-center">
-            <div className="text-lg font-semibold text-white">MWK {price_mwk.toLocaleString()}</div>
-            <Button onClick={() => onUnlock(course)} size="sm" className="mt-3 min-h-[44px] px-4">Unlock Course</Button>
-          </div>
-        </div>
-      )}
-      <div className="touch-target min-h-[44px]" onClick={() => is_enrolled && !isExpired && (window.location.href = `/course/${id}`)}>
-        <div className="mb-4 flex items-start justify-between">
+    <Card className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border-subtle p-0 shadow-card transition-all duration-fast hover:-translate-y-0.5 hover:shadow-card-hover">
+      <div className="space-y-4 p-5">
+        <div className="flex items-start justify-between gap-3">
           <div>
             <Badge variant="info">{subject}</Badge>
-            <h3 className="mt-2 text-lg font-bold text-primary">{title}</h3>
+            <h3 className="mt-2 text-lg font-bold leading-tight text-primary">{title}</h3>
           </div>
           <Badge variant="primary">{grade}</Badge>
         </div>
-        <div className="mb-4 text-sm text-secondary">{lesson_count} lessons</div>
-        <div className="flex flex-wrap gap-2">
-          {is_enrolled && !isExpired && <Badge variant="success">Enrolled — {days_remaining} days left</Badge>}
-          {isExpired && <Badge variant="danger">Access expired</Badge>}
-          {preview_available && !is_enrolled && <Badge>Preview available</Badge>}
+
+        <div className="flex items-center gap-2 text-sm text-secondary">
+          <span>📹</span>
+          <span>{lesson_count} lessons</span>
         </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Badge variant={chip.variant} className="font-semibold">{chip.label}</Badge>
+          {preview_available && !is_enrolled && <Badge variant="info">Preview lessons</Badge>}
+        </div>
+      </div>
+
+      <div className="mt-auto border-t border-border-subtle bg-surface-muted/60 p-4">
+        {is_enrolled && !isExpired ? (
+          <Button className="w-full" onClick={() => (window.location.href = `/course/${id}`)}>Continue course</Button>
+        ) : (
+          <div className="space-y-3">
+            <div className="text-center">
+              <p className="text-xs uppercase tracking-wide text-muted">One-time access</p>
+              <p className="text-2xl font-bold text-primary-700">MWK {price_mwk.toLocaleString()}</p>
+            </div>
+            <Button onClick={() => onUnlock(course)} className="w-full">{isExpired ? 'Renew enrollment' : 'Unlock course'}</Button>
+          </div>
+        )}
       </div>
     </Card>
   )

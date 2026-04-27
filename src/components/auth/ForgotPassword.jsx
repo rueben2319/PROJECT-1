@@ -7,6 +7,15 @@ import Input from '../ui/Input.jsx'
 import Card from '../ui/Card.jsx'
 import Toast from '../ui/Toast.jsx'
 
+function IconField({ icon, children }) {
+  return (
+    <div className="relative">
+      <span className="pointer-events-none absolute left-3 top-[2.3rem] text-base text-muted">{icon}</span>
+      {children}
+    </div>
+  )
+}
+
 export default function ForgotPassword() {
   const [step, setStep] = useState('form')
   const [formData, setFormData] = useState({ identifier: '' })
@@ -56,11 +65,11 @@ export default function ForgotPassword() {
 
   if (step === 'success') {
     return (
-      <Card className="mx-auto w-full max-w-md text-center">
+      <Card className="mx-auto w-full max-w-md rounded-2xl p-7 text-center shadow-card">
         <h2 className="mb-2 text-2xl font-bold text-primary">Reset Link Sent</h2>
-        <p className="mb-6 text-secondary">We sent reset instructions to {formData.identifier}.</p>
+        <p className="mb-6 text-sm text-secondary">We sent reset instructions to {formData.identifier}.</p>
         <div className="space-y-3">
-          <Link to="/login"><Button className="w-full">Back to Sign In</Button></Link>
+          <Link to="/login"><Button className="h-12 w-full">Back to Sign In</Button></Link>
           <Button variant="ghost" className="w-full" onClick={() => setStep('form')}>Send to different email/phone</Button>
         </div>
       </Card>
@@ -68,15 +77,26 @@ export default function ForgotPassword() {
   }
 
   return (
-    <Card className="mx-auto w-full max-w-md">
+    <Card className="mx-auto w-full max-w-md rounded-2xl p-7 shadow-card">
       <h1 className="mb-2 text-3xl font-bold text-primary">Reset Password</h1>
-      <p className="mb-8 text-secondary">Enter your phone or email to receive a reset link</p>
+      <p className="mb-8 text-sm text-secondary">Enter your phone or email to receive a reset link</p>
       <Toast message={errors.submit} tone="danger" className="mb-4" />
       <form onSubmit={handleSubmit} className="space-y-5">
-        <Input label="Phone Number or Email" value={formData.identifier} onChange={(e) => handleInputChange(e.target.value)} error={errors.identifier} disabled={loading} placeholder="088 123 4567 or your.email@example.com" />
-        <Button type="submit" disabled={loading} className="w-full">{loading ? 'Sending reset link...' : 'Send Reset Link'}</Button>
+        <IconField icon="📨">
+          <Input
+            label="Phone Number or Email"
+            value={formData.identifier}
+            onChange={(e) => handleInputChange(e.target.value)}
+            error={errors.identifier}
+            hint="We'll send a secure password reset link"
+            disabled={loading}
+            className="pl-10"
+            placeholder="088 123 4567 or your.email@example.com"
+          />
+        </IconField>
+        <Button type="submit" disabled={loading} className="h-12 w-full">{loading ? 'Sending reset link...' : 'Send Reset Link'}</Button>
       </form>
-      <div className="mt-6 text-center"><Link to="/login" className="text-sm font-medium text-primary-600">← Back to Sign In</Link></div>
+      <div className="mt-6 text-center"><Link to="/login" className="text-sm font-semibold text-primary-600">← Back to Sign In</Link></div>
     </Card>
   )
 }

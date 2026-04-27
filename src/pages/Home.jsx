@@ -4,10 +4,6 @@ import CourseGrid from '../components/courses/CourseGrid.jsx'
 import StudentShell from '../components/student/StudentShell.jsx'
 import { api } from '../lib/api.jsx'
 
-function CourseSkeleton() {
-  return <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{[1, 2, 3].map((i) => <div key={i} className="h-48 animate-pulse rounded-xl bg-gray-200" />)}</div>
-}
-
 export default function Home() {
   const [courses, setCourses] = useState(null)
   const [filteredCourses, setFilteredCourses] = useState(null)
@@ -42,16 +38,29 @@ export default function Home() {
   }
 
   return (
-    <StudentShell title="MSCE Learn" subtitle="Browse and continue your courses" bottomNav={[{ label: 'Home', to: '/', icon: '🏠' }]}>
+    <StudentShell title="MSCE Learn" subtitle="Choose a course and keep your streak alive" bottomNav={[{ label: 'Home', to: '/', icon: '🏠' }]}>
       {error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
-          <p className="mb-3">{error}</p>
-          <button onClick={fetchCourses} className="touch-target rounded-lg bg-red-600 px-4 py-2 text-white min-h-[44px]">Try Again</button>
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-700 shadow-sm">
+          <p className="mb-3 font-medium">{error}</p>
+          <button onClick={fetchCourses} className="touch-target min-h-[44px] rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white">Try Again</button>
         </div>
       ) : (
         <>
-          <div className="mb-6"><SubjectFilter filters={filters} onFilterChange={setFilters} /></div>
-          {loading ? <CourseSkeleton /> : <CourseGrid courses={filteredCourses} enrollments={enrollments} onUnlock={(course) => (window.location.href = `/payment?course_id=${course.id}`)} />}
+          <section className="mb-6 rounded-2xl border border-border-subtle bg-surface p-4 shadow-card">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">Course library</p>
+            <h2 className="mt-1 text-xl font-bold text-primary">Browse by subject and grade</h2>
+            <p className="mt-1 text-sm text-secondary">Find your next lesson fast with smarter filters and clear enrollment badges.</p>
+            <div className="mt-4">
+              <SubjectFilter filters={filters} onFilterChange={setFilters} />
+            </div>
+          </section>
+
+          <CourseGrid
+            courses={filteredCourses}
+            enrollments={enrollments}
+            loading={loading}
+            onUnlock={(course) => (window.location.href = `/payment?course_id=${course.id}`)}
+          />
         </>
       )}
     </StudentShell>
