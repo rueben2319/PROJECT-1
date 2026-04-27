@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { AdminSectionHeader, ActionBar, DesktopTable, MobileCardList, StatusToast } from '../../components/admin/AdminPrimitives.jsx'
 
 export default function Content() {
   const [courses, setCourses] = useState([])
@@ -22,6 +23,7 @@ export default function Content() {
   })
   const [uploadProgress, setUploadProgress] = useState(0)
   const [actionLoading, setActionLoading] = useState(false)
+  const [toast, setToast] = useState(null)
 
   useEffect(() => {
     fetchCourses()
@@ -83,9 +85,11 @@ export default function Content() {
       })
       setShowCourseForm(false)
       await fetchCourses()
+      setToast({ tone: 'success', message: 'Course created successfully' })
 
     } catch (err) {
       setError(err.message)
+      setToast({ tone: 'danger', message: err.message })
     } finally {
       setActionLoading(false)
     }
@@ -113,6 +117,7 @@ export default function Content() {
       }
 
       await fetchCourses()
+      setToast({ tone: 'success', message: `Course ${publish ? 'published' : 'unpublished'} successfully` })
 
     } catch (err) {
       setError(err.message)
@@ -153,6 +158,7 @@ export default function Content() {
       setShowVideoForm(false)
       setUploadProgress(0)
       await fetchCourses()
+      setToast({ tone: 'success', message: 'Video lesson uploaded successfully' })
 
     } catch (err) {
       setError(err.message)
@@ -192,13 +198,10 @@ export default function Content() {
   return (
     <div className="p-6">
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Content Management</h1>
-        <p className="text-gray-400">Create and manage courses and video content</p>
-      </div>
+      <AdminSectionHeader title="Content Management" description="Create and manage courses and video content" />
 
       {/* Action Buttons */}
-      <div className="flex space-x-4 mb-8">
+      <ActionBar>
         <button
           onClick={() => setShowCourseForm(true)}
           className="px-4 py-2 bg-[#0F6E56] text-white rounded-lg hover:bg-[#0F6E56]/80 transition-colors"
@@ -211,26 +214,15 @@ export default function Content() {
         >
           Upload Video Lesson
         </button>
-      </div>
+      </ActionBar>
 
       {/* Published Courses Table */}
       <div className="bg-[#111827] border border-[#1F2D45] rounded-lg p-6">
         <h3 className="text-lg font-semibold text-white mb-6">Published Courses</h3>
         
         {courses.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-gray-400 border-b border-[#1F2D45]">
-                  <th className="pb-3">Title</th>
-                  <th className="pb-3">Grade</th>
-                  <th className="pb-3">Lessons</th>
-                  <th className="pb-3">Price</th>
-                  <th className="pb-3">Enrollments</th>
-                  <th className="pb-3">Status</th>
-                  <th className="pb-3">Actions</th>
-                </tr>
-              </thead>
+          <>
+          <DesktopTable headers={['Title', 'Grade', 'Lessons', 'Price', 'Enrollments', 'Status', 'Actions']}>
               <tbody>
                 {courses.map((course, index) => (
                   <tr key={index} className="border-b border-[#1F2D45]/50">
@@ -277,8 +269,20 @@ export default function Content() {
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
+            </DesktopTable>
+            <MobileCardList>
+              {courses.map((course, index) => (
+                <div key={`mobile-${index}`} className="rounded-lg border border-[#1F2D45] bg-[#0A0E1A] p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-white font-semibold">{course.title}</p>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(course.published)}`}>{course.published ? 'LIVE' : 'DRAFT'}</span>
+                  </div>
+                  <p className="text-sm text-gray-400">{course.grade} • {course.lesson_count || 0} lessons</p>
+                  <p className="text-sm font-mono text-white">{formatCurrency(course.price_mwk)}</p>
+                </div>
+              ))}
+            </MobileCardList>
+          </>
         ) : (
           <div className="text-center py-8 text-gray-400">
             No courses found. Create your first course to get started.
@@ -520,6 +524,7 @@ export default function Content() {
           </div>
         </div>
       )}
+      <StatusToast toast={toast} onClose={() => setToast(null)} />
     </div>
   )
 }

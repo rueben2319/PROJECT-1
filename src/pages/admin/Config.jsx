@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { AdminSectionHeader, DesktopTable, MobileCardList, ConfirmActionModal, StatusToast } from '../../components/admin/AdminPrimitives.jsx'
 
 export default function Config() {
   const [paychanguConfig, setPaychanguConfig] = useState({
@@ -21,6 +22,7 @@ export default function Config() {
   const [showWebhookSecret, setShowWebhookSecret] = useState(false)
   const [showMaintenanceConfirm, setShowMaintenanceConfirm] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
+  const [toast, setToast] = useState(null)
 
   useEffect(() => {
     fetchConfigData()
@@ -74,6 +76,7 @@ export default function Config() {
       }
 
       setError('PayChangu configuration saved. Please redeploy Edge Functions to apply changes.')
+      setToast({ tone: 'success', message: 'PayChangu configuration saved' })
       setTimeout(() => setError(null), 5000)
 
     } catch (err) {
@@ -102,6 +105,7 @@ export default function Config() {
       }
 
       setError('Access configuration saved successfully')
+      setToast({ tone: 'success', message: 'Access configuration saved successfully' })
       setTimeout(() => setError(null), 3000)
 
     } catch (err) {
@@ -141,9 +145,11 @@ export default function Config() {
         ...prev,
         [key]: enabled
       }))
+      setToast({ tone: 'success', message: `${key} ${enabled ? 'enabled' : 'disabled'}` })
 
     } catch (err) {
       setError(err.message)
+      setToast({ tone: 'danger', message: err.message })
       setTimeout(() => setError(null), 3000)
     }
   }
@@ -189,10 +195,7 @@ export default function Config() {
   return (
     <div className="p-6">
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">System Configuration</h1>
-        <p className="text-gray-400">Manage system settings, feature flags, and integration preferences</p>
-      </div>
+      <AdminSectionHeader title="System Configuration" description="Manage system settings, feature flags, and integration preferences" />
 
       {/* Error/Success Messages */}
       {error && (
@@ -403,7 +406,8 @@ export default function Config() {
       <div className="bg-[#111827] border border-[#1F2D45] rounded-lg p-6">
         <h3 className="text-lg font-semibold text-white mb-6">Feature Flags</h3>
         
-        <div className="space-y-3">
+        <DesktopTable headers={['Feature', 'Description', 'Enabled']}>
+          <tbody>
           {[
             { key: 'registrations_open', label: 'User Registrations', description: 'Allow new user registrations' },
             { key: 'free_previews', label: 'Free Preview Lessons', description: 'Show preview lessons without enrollment' },
@@ -412,54 +416,49 @@ export default function Config() {
             { key: 'airtel_money', label: 'Airtel Money', description: 'Enable Airtel Money payments' },
             { key: 'tnm_mpamba', label: 'TNM Mpamba', description: 'Enable TNM Mpamba payments' }
           ].map(({ key, label, description }) => (
-            <div key={key} className="flex items-center justify-between p-3 bg-[#1F2D45]/30 rounded-lg">
-              <div className="flex-1">
-                <div className="text-white font-medium">{label}</div>
-                <div className="text-sm text-gray-400">{description}</div>
-              </div>
-              <button
-                onClick={() => handleFeatureToggle(key, !featureFlags[key])}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  featureFlags[key] ? 'bg-[#0F6E56]' : 'bg-gray-600'
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    featureFlags[key] ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
-              </button>
+            <tr key={key} className="border-b border-[#1F2D45]/50">
+              <td className="py-3 text-white font-medium">{label}</td>
+              <td className="py-3 text-gray-400">{description}</td>
+              <td className="py-3">
+                <button
+                  onClick={() => handleFeatureToggle(key, !featureFlags[key])}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${featureFlags[key] ? 'bg-[#0F6E56]' : 'bg-gray-600'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${featureFlags[key] ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+              </td>
+            </tr>
+          ))}
+          </tbody>
+        </DesktopTable>
+        <MobileCardList>
+          {[
+            { key: 'registrations_open', label: 'User Registrations', description: 'Allow new user registrations' },
+            { key: 'free_previews', label: 'Free Preview Lessons', description: 'Show preview lessons without enrollment' },
+            { key: 'sms_renewal_reminders', label: 'SMS Renewal Reminders', description: 'Send SMS for expiring enrollments' },
+            { key: 'maintenance_mode', label: 'Maintenance Mode', description: 'Disable public access (show maintenance page)' },
+            { key: 'airtel_money', label: 'Airtel Money', description: 'Enable Airtel Money payments' },
+            { key: 'tnm_mpamba', label: 'TNM Mpamba', description: 'Enable TNM Mpamba payments' }
+          ].map(({ key, label, description }) => (
+            <div key={`m-${key}`} className="rounded-lg border border-[#1F2D45] bg-[#0A0E1A] p-4">
+              <p className="text-white font-medium">{label}</p>
+              <p className="mt-1 text-sm text-gray-400">{description}</p>
             </div>
           ))}
-        </div>
+        </MobileCardList>
       </div>
 
-      {/* Maintenance Mode Confirmation */}
-      {showMaintenanceConfirm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#111827] border border-[#1F2D45] rounded-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Enable Maintenance Mode</h3>
-            <p className="text-gray-400 mb-6">
-              Are you sure you want to enable maintenance mode? This will disable public access to the entire platform and show a maintenance page to all users.
-            </p>
-            
-            <div className="flex space-x-3">
-              <button
-                onClick={confirmMaintenanceMode}
-                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-              >
-                Enable Maintenance
-              </button>
-              <button
-                onClick={() => setShowMaintenanceConfirm(false)}
-                className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmActionModal
+        isOpen={showMaintenanceConfirm}
+        title="Enable Maintenance Mode"
+        message="This will disable public access and show the maintenance page to all users."
+        confirmLabel="Enable Maintenance"
+        tone="danger"
+        loading={actionLoading}
+        onConfirm={confirmMaintenanceMode}
+        onCancel={() => setShowMaintenanceConfirm(false)}
+      />
+      <StatusToast toast={toast} onClose={() => setToast(null)} />
     </div>
   )
 }

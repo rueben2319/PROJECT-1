@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { AdminSectionHeader, DesktopTable, MobileCardList, CompactChartContainer } from '../../components/admin/AdminPrimitives.jsx'
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -115,10 +116,7 @@ export default function Dashboard() {
   return (
     <div className="p-6">
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Command Centre</h1>
-        <p className="text-gray-400">System overview and real-time metrics</p>
-      </div>
+      <AdminSectionHeader title="Command Centre" description="System overview and real-time metrics" />
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -225,9 +223,10 @@ export default function Dashboard() {
           <h3 className="text-lg font-semibold text-white mb-6">Revenue (Last 7 Days)</h3>
           
           {revenueChart.length > 0 ? (
+            <CompactChartContainer>
             <div className="space-y-4">
               {/* Chart Bars */}
-              <div className="flex items-end justify-between h-40 px-2">
+              <div className="flex items-end justify-between h-40 min-w-[540px] px-2">
                 {revenueChart.map((day, index) => {
                   const maxRevenue = Math.max(...revenueChart.map(d => d.revenue_mwk))
                   const height = maxRevenue > 0 ? (day.revenue_mwk / maxRevenue) * 100 : 0
@@ -240,7 +239,7 @@ export default function Dashboard() {
                           style={{ height: `${Math.max(height, 2)}%` }}
                         >
                           {/* Tooltip */}
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity pointer-events-none whitespace-nowrap group-hover:opacity-100 md:group-hover:opacity-100 group-active:opacity-100">
                             {formatCurrency(day.revenue_mwk)}
                           </div>
                         </div>
@@ -261,6 +260,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+            </CompactChartContainer>
           ) : (
             <div className="text-center py-8 text-gray-400">
               No revenue data available
@@ -308,18 +308,8 @@ export default function Dashboard() {
           <h3 className="text-lg font-semibold text-white mb-6">Recent Transactions</h3>
           
           {recentTransactions.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-gray-400 border-b border-[#1F2D45]">
-                    <th className="pb-3">Time</th>
-                    <th className="pb-3">Student</th>
-                    <th className="pb-3">Course</th>
-                    <th className="pb-3">Amount</th>
-                    <th className="pb-3">Status</th>
-                    <th className="pb-3">Network</th>
-                  </tr>
-                </thead>
+            <>
+            <DesktopTable headers={['Time', 'Student', 'Course', 'Amount', 'Status', 'Network']}>
                 <tbody>
                   {recentTransactions.map((transaction, index) => (
                     <tr key={index} className="border-b border-[#1F2D45]/50">
@@ -349,8 +339,21 @@ export default function Dashboard() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
-            </div>
+            </DesktopTable>
+            <MobileCardList>
+              {recentTransactions.map((transaction, index) => (
+                <div key={`mobile-${index}`} className="rounded-lg border border-[#1F2D45] bg-[#0A0E1A] p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-white font-semibold">{transaction.student_name}</p>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(transaction.status)}`}>{transaction.status}</span>
+                  </div>
+                  <p className="text-sm text-gray-300">{transaction.course_title}</p>
+                  <p className="text-sm font-mono text-white">{formatCurrency(transaction.amount_mwk)}</p>
+                  <p className="text-xs text-gray-400">{new Date(transaction.created_at).toLocaleString()}</p>
+                </div>
+              ))}
+            </MobileCardList>
+            </>
           ) : (
             <div className="text-center py-8 text-gray-400">
               No recent transactions

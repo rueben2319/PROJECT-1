@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { AdminSectionHeader, FilterBar, ActionBar, DesktopTable, MobileCardList, StatusToast } from '../../components/admin/AdminPrimitives.jsx'
 
 export default function Audit() {
   const [events, setEvents] = useState([])
@@ -198,10 +199,7 @@ export default function Audit() {
   return (
     <div className="p-6">
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Audit Log</h1>
-        <p className="text-gray-400">View and export system audit events</p>
-      </div>
+      <AdminSectionHeader title="Audit Log" description="View and export system audit events" />
 
       {/* Info Banner */}
       <div className="mb-6 p-4 bg-blue-500/20 border border-blue-500/30 rounded-lg">
@@ -219,7 +217,7 @@ export default function Audit() {
       </div>
 
       {/* Filters */}
-      <div className="bg-[#111827] border border-[#1F2D45] rounded-lg p-6 mb-6">
+      <FilterBar>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -271,7 +269,7 @@ export default function Audit() {
           </div>
         </div>
 
-        <div className="flex space-x-3 mt-4">
+        <ActionBar>
           <button
             onClick={clearFilters}
             className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
@@ -285,8 +283,8 @@ export default function Audit() {
           >
             {exportLoading ? 'Exporting...' : 'Export CSV'}
           </button>
-        </div>
-      </div>
+        </ActionBar>
+      </FilterBar>
 
       {/* Events Table */}
       <div className="bg-[#111827] border border-[#1F2D45] rounded-lg p-6">
@@ -299,16 +297,7 @@ export default function Audit() {
         
         {events.length > 0 ? (
           <>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-gray-400 border-b border-[#1F2D45]">
-                    <th className="pb-3 font-mono text-xs">Timestamp</th>
-                    <th className="pb-3">Event Type</th>
-                    <th className="pb-3">User</th>
-                    <th className="pb-3">Details</th>
-                  </tr>
-                </thead>
+            <DesktopTable headers={['Timestamp', 'Event Type', 'User', 'Details']}>
                 <tbody>
                   {events.map((event, index) => (
                     <tr key={index} className="border-b border-[#1F2D45]/50">
@@ -331,8 +320,17 @@ export default function Audit() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
-            </div>
+            </DesktopTable>
+            <MobileCardList>
+              {events.map((event, index) => (
+                <div key={`mobile-${index}`} className="rounded-lg border border-[#1F2D45] bg-[#0A0E1A] p-4 space-y-1">
+                  <p className="text-xs text-gray-500">{formatTimestamp(event.created_at)}</p>
+                  <p className="text-white">{event.action}</p>
+                  <p className="text-sm text-gray-400">{event.user_email || 'System'}</p>
+                  <p className="text-sm text-gray-300">{formatDetails(event.details)}</p>
+                </div>
+              ))}
+            </MobileCardList>
 
             {/* Pagination */}
             <div className="flex justify-between items-center mt-6">
@@ -394,11 +392,7 @@ export default function Audit() {
       </div>
 
       {/* Error Messages */}
-      {error && (
-        <div className="fixed bottom-4 right-4 p-4 rounded-lg border bg-red-500/20 border-red-500/30 text-red-400">
-          {error}
-        </div>
-      )}
+      <StatusToast toast={error ? { tone: 'danger', message: error } : null} onClose={() => setError(null)} />
     </div>
   )
 }
