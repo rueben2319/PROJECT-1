@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { forwardRef } from 'react'
 import { cn } from '../../lib/cn.js'
 
 const tones = {
@@ -7,6 +7,8 @@ const tones = {
   subtle: 'bg-surface-muted text-primary border border-border-subtle'
 }
 
-export default function Card({ className = '', tone = 'default', children }) {
-  return <div className={cn('rounded-lg p-6', tones[tone], className)}>{children}</div>
-}
+const Card = forwardRef(function Card({ className = '', tone = 'default', children, ...props }, ref) {
+  return <div ref={ref} className={cn('rounded-lg p-6', tones[tone], className)} {...props}>{children}</div>
+})
+
+export default Card

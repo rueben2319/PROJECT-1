@@ -47,8 +47,8 @@ export default {
           muted: '#64748B',
           inverse: '#F8FAFC'
         },
-        success: { 100: '#DCFCE7', 200: '#BBF7D0', 700: '#15803D', DEFAULT: '#16A34A' },
-        warning: { 100: '#FEF3C7', 200: '#FDE68A', 700: '#B45309', DEFAULT: '#D97706' },
+        success: { 100: '#DCFCE7', 200: '#BBF7D0', 700: '#15803D', DEFAULT: '#15803D' },
+        warning: { 100: '#FEF3C7', 200: '#FDE68A', 700: '#B45309', DEFAULT: '#B45309' },
         danger: { 100: '#FEE2E2', 200: '#FECACA', 700: '#B91C1C', DEFAULT: '#DC2626' },
         border: {
           default: '#CBD5E1',

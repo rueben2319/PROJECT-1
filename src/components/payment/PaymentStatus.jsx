@@ -5,6 +5,7 @@ import Card from '../ui/Card.jsx'
 import Button from '../ui/Button.jsx'
 import Badge from '../ui/Badge.jsx'
 import Skeleton from '../ui/Skeleton.jsx'
+import ErrorState from '../ui/ErrorState.jsx'
 
 const steps = ['Initiated', 'Verifying', 'Completed']
 
@@ -66,10 +67,10 @@ export default function PaymentStatus() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface-muted p-4">
-      <Card className="w-full max-w-md rounded-2xl p-6 shadow-card">
-        <div className="mb-5 flex items-center justify-between gap-2">
+      <Card className="w-full max-w-md rounded-2xl p-6 shadow-card" role="status" aria-live="polite">
+        <div className="mb-5 flex items-center justify-between gap-2" aria-label="Payment progress" role="list">
           {steps.map((step, index) => (
-            <div key={step} className="flex flex-1 items-center gap-2">
+            <div key={step} className="flex flex-1 items-center gap-2" role="listitem" aria-label={`${step} ${index <= currentStep ? 'complete' : 'pending'}`}>
               <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${index <= currentStep ? 'bg-primary-600 text-white' : 'bg-surface-muted text-muted'}`}>{index + 1}</div>
               {index < steps.length - 1 && <div className={`h-0.5 flex-1 ${index < currentStep ? 'bg-primary-400' : 'bg-border-subtle'}`} />}
             </div>
@@ -93,23 +94,23 @@ export default function PaymentStatus() {
         )}
 
         {status === 'failed' && (
-          <div className="space-y-3 text-center">
-            <Badge variant="danger" className="mx-auto">Payment Failed</Badge>
-            <h1 className="text-2xl font-bold text-primary">We couldn't confirm payment</h1>
-            <p className="text-sm text-danger">{error || 'Your payment could not be completed'}</p>
-            <div className="space-y-2 pt-1">
-              <Button className="h-12 w-full" onClick={() => navigate('/')}>Try again</Button>
-              <Button variant="ghost" className="w-full" onClick={() => navigate('/')}>Back to courses</Button>
-            </div>
-          </div>
+          <ErrorState
+            title="We couldn't confirm payment"
+            message={error || 'Your payment could not be completed'}
+            actionLabel="Try again"
+            onAction={() => navigate('/')}
+            className="border-none bg-transparent p-0 shadow-none"
+          />
         )}
 
         {status === 'error' && (
-          <div className="space-y-3 text-center">
-            <Badge variant="warning" className="mx-auto">Payment Error</Badge>
-            <p className="text-sm text-danger">{error}</p>
-            <Button className="h-12 w-full" onClick={() => navigate('/')}>Back to courses</Button>
-          </div>
+          <ErrorState
+            title="Payment Error"
+            message={error}
+            actionLabel="Back to courses"
+            onAction={() => navigate('/')}
+            className="border-none bg-transparent p-0 shadow-none"
+          />
         )}
 
         {paymentData && <p className="mt-5 text-center text-xs text-muted">Transaction ID: {txRef}</p>}

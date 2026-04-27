@@ -6,6 +6,7 @@ import Input from '../ui/Input.jsx'
 import Card from '../ui/Card.jsx'
 import Badge from '../ui/Badge.jsx'
 import Skeleton from '../ui/Skeleton.jsx'
+import ErrorState from '../ui/ErrorState.jsx'
 
 const steps = ['Details', 'Confirming', 'Done']
 
@@ -86,7 +87,7 @@ export default function PaymentModal({ course, onClose, onSuccess }) {
 
   return (
     <Modal isOpen onClose={handleClose} title="Unlock Course">
-      <div className="space-y-4 pb-2">
+      <div className="space-y-4 pb-2" role="status" aria-live="polite">
         <div className="flex items-center justify-between gap-2">
           {steps.map((step, index) => (
             <div key={step} className="flex flex-1 items-center gap-2">
@@ -110,7 +111,11 @@ export default function PaymentModal({ course, onClose, onSuccess }) {
         {state === 'idle' && (
           <>
             <Input
+              id="mobile-money-number"
+              name="mobile-money-number"
+              autoComplete="tel"
               label="Mobile Money Number"
+              required
               value={phoneNumber}
               onChange={(e) => {
                 setPhoneNumber(formatPhoneNumber(e.target.value))
@@ -143,11 +148,11 @@ export default function PaymentModal({ course, onClose, onSuccess }) {
         {state === 'failed' && (
           <Card tone="subtle" className="space-y-2 rounded-xl text-center">
             <Badge variant="danger" className="mx-auto">Payment failed</Badge>
-            <p className="text-sm text-danger">{error}</p>
+            <ErrorState title="Payment failed" message={error} actionLabel="Try payment again" onAction={() => setState('idle')} className="border-none bg-transparent p-0 shadow-none" />
           </Card>
         )}
 
-        <div className="sticky bottom-0 -mx-1 border-t border-border-subtle bg-surface px-1 pt-3">
+        <div className="sticky bottom-0 -mx-1 border-t border-border-subtle bg-surface px-1 pt-3" aria-label="Payment actions">
           {state === 'idle' && (
             <div className="space-y-2">
               <Button onClick={createPayment} className="h-12 w-full" disabled={!validatePhoneNumber(phoneNumber.replace(/\s/g, ''))}>Pay MWK {price_mwk.toLocaleString()}</Button>

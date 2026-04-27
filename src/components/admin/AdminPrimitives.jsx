@@ -97,19 +97,19 @@ export function ConfirmActionModal({ isOpen, title, message, confirmLabel = 'Con
   const buttonTone = tone === 'danger' ? 'bg-red-500 hover:bg-red-600' : 'bg-[#0F6E56] hover:bg-[#0F6E56]/80'
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-lg border border-[#1F2D45] bg-[#111827] p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" role="presentation">
+      <div className="w-full max-w-md rounded-lg border border-[#1F2D45] bg-[#111827] p-6" role="dialog" aria-modal="true" aria-label={title}>
         <h3 className="text-lg font-semibold text-white">{title}</h3>
         <p className="mt-2 text-sm text-gray-400">{message}</p>
         <div className="mt-5 flex gap-3">
           <button
             onClick={onConfirm}
             disabled={loading}
-            className={cn('flex-1 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50', buttonTone)}
+            className={cn('flex-1 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#111827] focus-visible:ring-primary-300 disabled:opacity-50', buttonTone)}
           >
             {loading ? 'Processing...' : confirmLabel}
           </button>
-          <button onClick={onCancel} className="flex-1 rounded-lg bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+          <button onClick={onCancel} className="flex-1 rounded-lg bg-gray-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-fast hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#111827] focus-visible:ring-primary-300">
             Cancel
           </button>
         </div>
@@ -130,7 +130,7 @@ export function StatusToast({ toast, onClose }) {
     <div className={cn('fixed bottom-4 right-4 z-50 max-w-sm rounded-lg border px-4 py-3 text-sm shadow-xl', toneClass)}>
       <div className="flex items-start gap-3">
         <p className="flex-1">{toast.message}</p>
-        <button onClick={onClose} className="text-xs text-gray-200">✕</button>
+        <button onClick={onClose} className="text-xs text-gray-200 transition-colors duration-fast hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#111827] focus-visible:ring-primary-300" aria-label="Dismiss notification">✕</button>
       </div>
     </div>
   )
