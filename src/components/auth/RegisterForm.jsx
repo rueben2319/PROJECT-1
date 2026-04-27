@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase.jsx'
+import { normalizeAuthError } from '../../lib/api.jsx'
 import OTPInput from './OTPInput.jsx'
 
 export default function RegisterForm() {
@@ -92,11 +93,8 @@ export default function RegisterForm() {
       })
 
       if (error) {
-        if (error.message.includes('already registered')) {
-          setErrors({ submit: 'An account with this phone or email already exists' })
-        } else {
-          setErrors({ submit: error.message })
-        }
+        const normalized = normalizeAuthError(error)
+        setErrors({ submit: normalized.message })
         return
       }
 

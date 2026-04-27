@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase.jsx'
+import { createNormalizedError, ERROR_TYPES } from '../lib/api.jsx'
 
 export function useEnrollment(courseId) {
   const [enrollment, setEnrollment] = useState(null)
@@ -34,7 +35,7 @@ export function useEnrollment(courseId) {
 
       setEnrollment(data)
     } catch (err) {
-      setError(err.message)
+      setError(createNormalizedError({ type: ERROR_TYPES.GENERIC_FAILURE }).message)
     } finally {
       setLoading(false)
     }
@@ -92,7 +93,7 @@ export function useEnrollments() {
 
       setEnrollments(data || [])
     } catch (err) {
-      setError(err.message)
+      setError(createNormalizedError({ type: ERROR_TYPES.GENERIC_FAILURE }).message)
     } finally {
       setLoading(false)
     }

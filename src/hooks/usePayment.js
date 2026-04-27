@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { api } from '../lib/api.jsx'
+import { api, normalizeApiError, createNormalizedError, ERROR_TYPES } from '../lib/api.jsx'
 
 export function usePayment() {
   const [loading, setLoading] = useState(false)
@@ -36,7 +36,7 @@ export function usePayment() {
       return response
 
     } catch (err) {
-      setError(err.message || 'Failed to initiate payment')
+      setError(normalizeApiError(err))
       throw err
     } finally {
       setLoading(false)
@@ -77,14 +77,14 @@ export function usePayment() {
               data: response
             })
           } else if (Date.now() - startTime >= timeoutMs) {
-            reject(new Error('Payment verification timed out'))
+            reject(createNormalizedError({ type: ERROR_TYPES.GENERIC_FAILURE, details: 'payment_timeout', message: 'Payment verification timed out' }))
           } else {
             // Continue polling
             setTimeout(poll, pollInterval)
           }
         } catch (err) {
           if (Date.now() - startTime >= timeoutMs) {
-            reject(new Error('Payment verification timed out'))
+            reject(createNormalizedError({ type: ERROR_TYPES.GENERIC_FAILURE, details: 'payment_timeout', message: 'Payment verification timed out' }))
           } else {
             // Continue polling on network errors
             setTimeout(poll, pollInterval)
@@ -105,7 +105,7 @@ export function usePayment() {
       const response = await api.get(`/payment-status?tx_ref=${txRef}`)
       return response
     } catch (err) {
-      setError(err.message || 'Failed to get payment status')
+      setError(normalizeApiError(err))
       throw err
     }
   }

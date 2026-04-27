@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase.jsx'
+import { normalizeAuthError } from '../../lib/api.jsx'
 
 export default function ForgotPassword() {
   const [step, setStep] = useState('form') // 'form' | 'success'
@@ -62,11 +63,8 @@ export default function ForgotPassword() {
       })
 
       if (error) {
-        if (error.message.includes('User not found')) {
-          setErrors({ submit: 'No account found with this phone or email' })
-        } else {
-          setErrors({ submit: error.message })
-        }
+        const normalized = normalizeAuthError(error)
+        setErrors({ submit: normalized.message })
         return
       }
 
