@@ -13,11 +13,11 @@ export default function CourseCard({ course, onUnlock }) {
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="text-center">
             <div className="text-lg font-semibold text-white">MWK {price_mwk.toLocaleString()}</div>
-            <Button onClick={() => onUnlock(course)} size="sm" className="mt-3">Unlock Course</Button>
+            <Button onClick={() => onUnlock(course)} size="sm" className="mt-3 min-h-[44px] px-4">Unlock Course</Button>
           </div>
         </div>
       )}
-      <div onClick={() => is_enrolled && !isExpired && (window.location.href = `/course/${id}`)}>
+      <div className="touch-target min-h-[44px]" onClick={() => is_enrolled && !isExpired && (window.location.href = `/course/${id}`)}>
         <div className="mb-4 flex items-start justify-between">
           <div>
             <Badge variant="info">{subject}</Badge>

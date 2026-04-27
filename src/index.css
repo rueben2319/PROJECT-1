@@ -17,6 +17,16 @@
 }
 
 @layer utilities {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  button,
+  input,
+  select {
+    min-height: 44px;
+  }
 
   .text-primary {
     @apply text-text-primary;

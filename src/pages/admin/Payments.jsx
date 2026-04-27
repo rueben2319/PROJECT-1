@@ -118,13 +118,13 @@ export default function Payments() {
       <div className="flex space-x-2">
         <button
           onClick={() => handlePaymentAction(transaction.tx_ref, 'grant')}
-          className="px-3 py-1 bg-green-500/20 text-green-400 border border-green-500/30 rounded hover:bg-green-500/30 transition-colors text-sm"
+          className="touch-target min-h-[44px] px-3 py-1 bg-green-500/20 text-green-400 border border-green-500/30 rounded hover:bg-green-500/30 transition-colors text-sm"
         >
           Grant
         </button>
         <button
           onClick={() => handlePaymentAction(transaction.tx_ref, 'fail')}
-          className="px-3 py-1 bg-red-500/20 text-red-400 border border-red-500/30 rounded hover:bg-red-500/30 transition-colors text-sm"
+          className="touch-target min-h-[44px] px-3 py-1 bg-red-500/20 text-red-400 border border-red-500/30 rounded hover:bg-red-500/30 transition-colors text-sm"
         >
           Fail
         </button>
@@ -141,7 +141,7 @@ export default function Payments() {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="bg-[#111827] border border-[#1F2D45] rounded-lg p-6 animate-pulse">
               <div className="h-4 bg-gray-600 rounded w-1/2 mb-4"></div>
@@ -179,7 +179,7 @@ export default function Payments() {
       )}
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-[#111827] border border-[#1F2D45] rounded-lg p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="w-12 h-12 bg-[#0F6E56]/20 rounded-lg flex items-center justify-center">
@@ -261,7 +261,7 @@ export default function Payments() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* Revenue by Network */}
         <div className="bg-[#111827] border border-[#1F2D45] rounded-lg p-6">
           <h3 className="text-lg font-semibold text-white mb-6">Revenue by Network</h3>
@@ -338,7 +338,8 @@ export default function Payments() {
         <h3 className="text-lg font-semibold text-white mb-6">Recent Transactions</h3>
         
         {transactions.length > 0 ? (
-          <div className="overflow-x-auto">
+          <>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-gray-400 border-b border-[#1F2D45]">
@@ -389,6 +390,26 @@ export default function Payments() {
               </tbody>
             </table>
           </div>
+          <div className="md:hidden space-y-3">
+            {transactions.map((transaction, index) => (
+              <div key={index} className="rounded-lg border border-[#1F2D45] bg-[#0A0E1A] p-4 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-white font-semibold">{transaction.student_name}</p>
+                    <p className="text-xs text-gray-400 font-mono">{transaction.tx_ref}</p>
+                  </div>
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(transaction.status)}`}>
+                    {transaction.status}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-300">{transaction.course_title}</p>
+                <p className="text-sm text-gray-300">Network: {transaction.network}</p>
+                <p className="text-sm font-mono text-white">{formatCurrency(transaction.amount_mwk)}</p>
+                {getActionButtons(transaction)}
+              </div>
+            ))}
+          </div>
+          </>
         ) : (
           <div className="text-center py-8 text-gray-400">
             No transactions found
