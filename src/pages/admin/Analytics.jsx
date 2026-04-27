@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { AdminSectionHeader, CompactChartContainer, DesktopTable, MobileCardList } from '../../components/admin/AdminPrimitives.jsx'
 
 export default function Analytics() {
   const [analyticsData, setAnalyticsData] = useState(null)
@@ -86,10 +87,7 @@ export default function Analytics() {
   return (
     <div className="p-6">
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Analytics Dashboard</h1>
-        <p className="text-gray-400">Weekly business report and performance metrics</p>
-      </div>
+      <AdminSectionHeader title="Analytics Dashboard" description="Weekly business report and performance metrics" />
 
       {/* Error Message */}
       {error && (
@@ -184,7 +182,8 @@ export default function Analytics() {
             {/* Revenue by Day Chart */}
             <div className="bg-[#111827] border border-[#1F2D45] rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-6">Revenue by Day</h3>
-              <div className="space-y-3">
+              <CompactChartContainer>
+              <div className="space-y-3 min-w-[520px]">
                 {analyticsData.revenue.by_day.map((day, index) => (
                   <div key={index} className="flex items-center justify-between">
                     <div className="text-sm text-gray-400 w-20">
@@ -206,12 +205,14 @@ export default function Analytics() {
                   </div>
                 ))}
               </div>
+              </CompactChartContainer>
             </div>
 
             {/* Revenue by Course Chart */}
             <div className="bg-[#111827] border border-[#1F2D45] rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-6">Revenue by Course</h3>
-              <div className="space-y-3">
+              <CompactChartContainer>
+              <div className="space-y-3 min-w-[520px]">
                 {analyticsData.revenue.by_course.slice(0, 5).map((course, index) => (
                   <div key={index} className="flex items-center justify-between">
                     <div className="text-sm text-gray-400 flex-1 mr-4">
@@ -233,6 +234,7 @@ export default function Analytics() {
                   </div>
                 ))}
               </div>
+              </CompactChartContainer>
             </div>
           </div>
 
@@ -240,7 +242,8 @@ export default function Analytics() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             <div className="bg-[#111827] border border-[#1F2D45] rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-6">Revenue by Network</h3>
-              <div className="space-y-3">
+              <CompactChartContainer>
+              <div className="space-y-3 min-w-[520px]">
                 {analyticsData.revenue.by_network.map((network, index) => (
                   <div key={index} className="flex items-center justify-between">
                     <div className="text-sm text-gray-400">
@@ -265,6 +268,7 @@ export default function Analytics() {
                   </div>
                 ))}
               </div>
+              </CompactChartContainer>
             </div>
 
             {/* Content Performance */}
@@ -350,15 +354,7 @@ export default function Analytics() {
           {/* Most Active Students */}
           <div className="bg-[#111827] border border-[#1F2D45] rounded-lg p-6 mb-8">
             <h3 className="text-lg font-semibold text-white mb-6">Most Active Students</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-gray-400 border-b border-[#1F2D45]">
-                    <th className="pb-3">Student ID</th>
-                    <th className="pb-3">Lessons Completed</th>
-                    <th className="pb-3">Unique Courses</th>
-                  </tr>
-                </thead>
+            <DesktopTable headers={['Student ID', 'Lessons Completed', 'Unique Courses']}>
                 <tbody>
                   {analyticsData.students.most_active_students.map((student, index) => (
                     <tr key={index} className="border-b border-[#1F2D45]/50">
@@ -374,8 +370,16 @@ export default function Analytics() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
-            </div>
+            </DesktopTable>
+            <MobileCardList>
+              {analyticsData.students.most_active_students.map((student, index) => (
+                <div key={`mobile-${index}`} className="rounded-lg border border-[#1F2D45] bg-[#0A0E1A] p-4">
+                  <p className="text-xs font-mono text-gray-400">{student.user_id.slice(0, 8)}...</p>
+                  <p className="text-sm text-white">Lessons: {student.lessons_completed}</p>
+                  <p className="text-sm text-gray-300">Courses: {student.unique_courses}</p>
+                </div>
+              ))}
+            </MobileCardList>
           </div>
 
           {/* Drop-off Analysis */}

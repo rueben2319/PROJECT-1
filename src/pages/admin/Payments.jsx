@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { AdminSectionHeader, ConfirmActionModal, StatusToast, CompactChartContainer } from '../../components/admin/AdminPrimitives.jsx'
 
 export default function Payments() {
   const [stats, setStats] = useState({
@@ -16,6 +17,7 @@ export default function Payments() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [confirmAction, setConfirmAction] = useState(null)
   const [actionLoading, setActionLoading] = useState(false)
+  const [toast, setToast] = useState(null)
 
   useEffect(() => {
     fetchPaymentsData()
@@ -80,6 +82,7 @@ export default function Payments() {
 
       // Refresh data
       await fetchPaymentsData()
+      setToast({ tone: 'success', message: `Payment ${confirmAction} successful for ${selectedTransaction}` })
       
       // Close dialog
       setShowConfirmDialog(false)
@@ -88,6 +91,7 @@ export default function Payments() {
 
     } catch (err) {
       setError(err.message)
+      setToast({ tone: 'danger', message: err.message })
     } finally {
       setActionLoading(false)
     }
@@ -156,10 +160,7 @@ export default function Payments() {
   return (
     <div className="p-6">
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Payment Monitor</h1>
-        <p className="text-gray-400">Manage and monitor all payment transactions</p>
-      </div>
+      <AdminSectionHeader title="Payment Monitor" description="Manage and monitor all payment transactions" />
 
       {/* Alert Banner */}
       {oldPendingCount > 0 && (
@@ -267,7 +268,8 @@ export default function Payments() {
           <h3 className="text-lg font-semibold text-white mb-6">Revenue by Network</h3>
           
           {networkRevenue.length > 0 ? (
-            <div className="space-y-4">
+            <CompactChartContainer>
+            <div className="space-y-4 min-w-[520px]">
               {networkRevenue.map((network) => {
                 const maxRevenue = Math.max(...networkRevenue.map(n => n.revenue_mwk))
                 const width = maxRevenue > 0 ? (network.revenue_mwk / maxRevenue) * 100 : 0
@@ -290,6 +292,7 @@ export default function Payments() {
                 )
               })}
             </div>
+            </CompactChartContainer>
           ) : (
             <div className="text-center py-8 text-gray-400">
               No revenue data available
@@ -302,7 +305,8 @@ export default function Payments() {
           <h3 className="text-lg font-semibold text-white mb-6">Top Selling Courses</h3>
           
           {topCourses.length > 0 ? (
-            <div className="space-y-4">
+            <CompactChartContainer>
+            <div className="space-y-4 min-w-[520px]">
               {topCourses.map((course, index) => {
                 const maxRevenue = Math.max(...topCourses.map(c => c.revenue_mwk))
                 const width = maxRevenue > 0 ? (course.revenue_mwk / maxRevenue) * 100 : 0
@@ -325,6 +329,7 @@ export default function Payments() {
                 )
               })}
             </div>
+            </CompactChartContainer>
           ) : (
             <div className="text-center py-8 text-gray-400">
               No course data available
@@ -418,44 +423,21 @@ export default function Payments() {
       </div>
 
       {/* Confirm Dialog */}
-      {showConfirmDialog && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#111827] border border-[#1F2D45] rounded-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">
-              Confirm {confirmAction === 'grant' ? 'Grant' : 'Fail'} Payment
-            </h3>
-            <p className="text-gray-400 mb-6">
-              Are you sure you want to {confirmAction} payment {selectedTransaction}?
-              {confirmAction === 'grant' && ' This will grant the student access to the course.'}
-              {confirmAction === 'fail' && ' This will mark the payment as failed.'}
-            </p>
-            
-            <div className="flex space-x-3">
-              <button
-                onClick={confirmPaymentAction}
-                disabled={actionLoading}
-                className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
-                  confirmAction === 'grant'
-                    ? 'bg-green-500 text-white hover:bg-green-600'
-                    : 'bg-red-500 text-white hover:bg-red-600'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
-                {actionLoading ? 'Processing...' : `Confirm ${confirmAction === 'grant' ? 'Grant' : 'Fail'}`}
-              </button>
-              <button
-                onClick={() => {
-                  setShowConfirmDialog(false)
-                  setSelectedTransaction(null)
-                  setConfirmAction(null)
-                }}
-                className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmActionModal
+        isOpen={showConfirmDialog}
+        title={`Confirm ${confirmAction === 'grant' ? 'Grant' : 'Fail'} Payment`}
+        message={`Are you sure you want to ${confirmAction} payment ${selectedTransaction || ''}?`}
+        confirmLabel={`Confirm ${confirmAction === 'grant' ? 'Grant' : 'Fail'}`}
+        tone={confirmAction === 'grant' ? 'success' : 'danger'}
+        loading={actionLoading}
+        onConfirm={confirmPaymentAction}
+        onCancel={() => {
+          setShowConfirmDialog(false)
+          setSelectedTransaction(null)
+          setConfirmAction(null)
+        }}
+      />
+      <StatusToast toast={toast} onClose={() => setToast(null)} />
     </div>
   )
 }

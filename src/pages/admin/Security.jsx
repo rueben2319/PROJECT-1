@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { AdminSectionHeader, DesktopTable, MobileCardList, ActionBar, ConfirmActionModal, StatusToast } from '../../components/admin/AdminPrimitives.jsx'
 
 export default function Security() {
   const [stats, setStats] = useState({
@@ -12,6 +13,7 @@ export default function Security() {
   const [error, setError] = useState(null)
   const [showConfirmDialog, setShowConfirmDialog] = useState(null)
   const [actionLoading, setActionLoading] = useState(false)
+  const [toast, setToast] = useState(null)
 
   useEffect(() => {
     fetchSecurityData()
@@ -68,6 +70,7 @@ export default function Security() {
       }
 
       setError('All user sessions terminated successfully')
+      setToast({ tone: 'success', message: 'All user sessions terminated successfully' })
       setTimeout(() => setError(null), 3000)
       
       // Refresh data
@@ -99,6 +102,7 @@ export default function Security() {
 
       const data = await response.json()
       setError(`Expired ${data.expired_count} stale payments`)
+      setToast({ tone: 'success', message: `Expired ${data.expired_count} stale payments` })
       setTimeout(() => setError(null), 3000)
 
     } catch (err) {
@@ -130,6 +134,7 @@ export default function Security() {
       window.URL.revokeObjectURL(url)
 
       setError('Audit log downloaded successfully')
+      setToast({ tone: 'success', message: 'Audit log downloaded successfully' })
       setTimeout(() => setError(null), 3000)
 
     } catch (err) {
@@ -154,6 +159,7 @@ export default function Security() {
       }
 
       setError('Security report sent to admin email')
+      setToast({ tone: 'success', message: 'Security report sent to admin email' })
       setTimeout(() => setError(null), 3000)
 
     } catch (err) {
@@ -206,10 +212,7 @@ export default function Security() {
   return (
     <div className="p-6">
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Security Centre</h1>
-        <p className="text-gray-400">Monitor security threats and manage system protection</p>
-      </div>
+      <AdminSectionHeader title="Security Centre" description="Monitor security threats and manage system protection" />
 
       {/* Alert Banner */}
       {hasActiveThreats && (
@@ -350,24 +353,28 @@ export default function Security() {
         <h3 className="text-lg font-semibold text-white mb-6">Recent Security Events</h3>
         
         {securityEvents.length > 0 ? (
-          <div className="space-y-3">
-            {securityEvents.map((event, index) => (
-              <div key={index} className="flex items-center space-x-3 p-3 bg-[#1F2D45]/20 rounded-lg">
-                <div className={`w-2 h-2 rounded-full ${getEventColor(event.event_type)}`}></div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm text-gray-300">
-                    <span className="font-medium">{getEventLabel(event.event_type)}</span>
-                    {event.user_email && (
-                      <span className="text-gray-400 ml-2">- {event.user_email}</span>
-                    )}
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    {new Date(event.created_at).toLocaleString()}
-                  </div>
+          <>
+            <DesktopTable headers={['Event', 'User', 'Timestamp']}>
+              <tbody>
+                {securityEvents.map((event, index) => (
+                  <tr key={index} className="border-b border-[#1F2D45]/50">
+                    <td className="py-3 text-gray-300">{getEventLabel(event.event_type)}</td>
+                    <td className="py-3 text-gray-400">{event.user_email || 'System'}</td>
+                    <td className="py-3 text-xs text-gray-500">{new Date(event.created_at).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </DesktopTable>
+            <MobileCardList>
+              {securityEvents.map((event, index) => (
+                <div key={`m-${index}`} className="rounded-lg border border-[#1F2D45] bg-[#0A0E1A] p-4">
+                  <p className="text-white font-medium">{getEventLabel(event.event_type)}</p>
+                  <p className="text-sm text-gray-400">{event.user_email || 'System'}</p>
+                  <p className="text-xs text-gray-500">{new Date(event.created_at).toLocaleString()}</p>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </MobileCardList>
+          </>
         ) : (
           <div className="text-center py-8 text-gray-400">
             No recent security events
@@ -376,7 +383,7 @@ export default function Security() {
       </div>
 
       {/* Manual Actions */}
-      <div className="bg-[#111827] border border-[#1F2D45] rounded-lg p-6">
+      <ActionBar>
         <h3 className="text-lg font-semibold text-white mb-6">Manual Security Actions</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -414,46 +421,28 @@ export default function Security() {
             <div className="text-[#0F6E56]/70 text-sm mt-1">Send to admin email</div>
           </button>
         </div>
-      </div>
+      </ActionBar>
 
       {/* Confirmation Dialog */}
-      {showConfirmDialog === 'terminate' && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#111827] border border-[#1F2D45] rounded-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Terminate All Sessions</h3>
-            <p className="text-gray-400 mb-6">
-              Are you sure you want to terminate all user sessions? This will force logout all users including yourself. You'll need to log in again after this action.
-            </p>
-            
-            <div className="flex space-x-3">
-              <button
-                onClick={handleTerminateSessions}
-                disabled={actionLoading}
-                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {actionLoading ? 'Terminating...' : 'Terminate Sessions'}
-              </button>
-              <button
-                onClick={() => setShowConfirmDialog(null)}
-                className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmActionModal
+        isOpen={showConfirmDialog === 'terminate'}
+        title="Terminate All Sessions"
+        message="This will force logout all users including yourself."
+        confirmLabel="Terminate Sessions"
+        tone="danger"
+        loading={actionLoading}
+        onConfirm={handleTerminateSessions}
+        onCancel={() => setShowConfirmDialog(null)}
+      />
 
       {/* Error/Success Messages */}
-      {error && (
-        <div className={`fixed bottom-4 right-4 p-4 rounded-lg border ${
-          error.includes('success') || error.includes('downloaded') || error.includes('sent')
-            ? 'bg-green-500/20 border-green-500/30 text-green-400'
-            : 'bg-red-500/20 border-red-500/30 text-red-400'
-        }`}>
-          {error}
-        </div>
-      )}
+      <StatusToast
+        toast={toast || (error ? { tone: 'danger', message: error } : null)}
+        onClose={() => {
+          setToast(null)
+          setError(null)
+        }}
+      />
     </div>
   )
 }

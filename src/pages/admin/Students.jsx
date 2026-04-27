@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { AdminSectionHeader, FilterBar, ActionBar, ConfirmActionModal, StatusToast } from '../../components/admin/AdminPrimitives.jsx'
 
 export default function Students() {
   const [stats, setStats] = useState({
@@ -23,6 +24,8 @@ export default function Students() {
   const [courses, setCourses] = useState([])
   const [renewalDays, setRenewalDays] = useState(7)
   const [actionLoading, setActionLoading] = useState(false)
+  const [showGrantConfirm, setShowGrantConfirm] = useState(false)
+  const [toast, setToast] = useState(null)
 
   useEffect(() => {
     fetchStudentsData()
@@ -105,7 +108,7 @@ export default function Students() {
   }
 
   const handleGrantSubmit = async (e) => {
-    e.preventDefault()
+    if (e?.preventDefault) e.preventDefault()
     
     try {
       setActionLoading(true)
@@ -126,13 +129,16 @@ export default function Students() {
 
       // Refresh data
       await fetchStudentsData()
+      setToast({ tone: 'success', message: 'Access granted successfully' })
       
       // Close modal
       setShowGrantModal(false)
+      setShowGrantConfirm(false)
       setGrantForm({ student_id: '', course_id: '', days: 30 })
 
     } catch (err) {
       setError(err.message)
+      setToast({ tone: 'danger', message: err.message })
     } finally {
       setActionLoading(false)
     }
@@ -158,6 +164,7 @@ export default function Students() {
 
       // Show success message
       setError('Renewal SMS sent successfully')
+      setToast({ tone: 'success', message: 'Renewal SMS sent successfully' })
       setTimeout(() => setError(null), 3000)
 
     } catch (err) {
@@ -202,10 +209,7 @@ export default function Students() {
   return (
     <div className="p-6">
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Student Management</h1>
-        <p className="text-gray-400">Manage students, grant access, and monitor activity</p>
-      </div>
+      <AdminSectionHeader title="Student Management" description="Manage students, grant access, and monitor activity" />
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -287,7 +291,7 @@ export default function Students() {
       </div>
 
       {/* Renewal Campaign */}
-      <div className="bg-[#111827] border border-[#1F2D45] rounded-lg p-6 mb-8">
+      <ActionBar>
         <h3 className="text-lg font-semibold text-white mb-4">Renewal Campaign</h3>
         <div className="flex items-center justify-between">
           <div>
@@ -318,7 +322,7 @@ export default function Students() {
             </button>
           </div>
         </div>
-      </div>
+      </ActionBar>
 
       {/* Manual Grant Access */}
       <div className="bg-[#111827] border border-[#1F2D45] rounded-lg p-6 mb-8">
@@ -337,7 +341,7 @@ export default function Students() {
       </div>
 
       {/* Search */}
-      <div className="mb-6">
+      <FilterBar>
         <div className="relative">
           <input
             type="text"
@@ -350,7 +354,7 @@ export default function Students() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
-      </div>
+      </FilterBar>
 
       {/* Students Table */}
       <div className="bg-[#111827] border border-[#1F2D45] rounded-lg p-6">
@@ -578,13 +582,17 @@ export default function Students() {
               </div>
 
               <div className="flex space-x-3">
-                <button
-                  type="submit"
-                  disabled={actionLoading}
-                  className="flex-1 px-4 py-2 bg-[#0F6E56] text-white rounded-lg hover:bg-[#0F6E56]/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {actionLoading ? 'Processing...' : 'Grant Access'}
-                </button>
+              <button
+                type="submit"
+                disabled={actionLoading}
+                onClick={(e) => {
+                  e.preventDefault()
+                  setShowGrantConfirm(true)
+                }}
+                className="flex-1 px-4 py-2 bg-[#0F6E56] text-white rounded-lg hover:bg-[#0F6E56]/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {actionLoading ? 'Processing...' : 'Grant Access'}
+              </button>
                 <button
                   type="button"
                   onClick={() => setShowGrantModal(false)}
@@ -597,6 +605,17 @@ export default function Students() {
           </div>
         </div>
       )}
+      <ConfirmActionModal
+        isOpen={showGrantConfirm}
+        title="Confirm manual grant"
+        message="Granting access will immediately enroll the selected student into this course."
+        confirmLabel="Confirm Grant"
+        tone="success"
+        loading={actionLoading}
+        onConfirm={handleGrantSubmit}
+        onCancel={() => setShowGrantConfirm(false)}
+      />
+      <StatusToast toast={toast} onClose={() => setToast(null)} />
     </div>
   )
 }
