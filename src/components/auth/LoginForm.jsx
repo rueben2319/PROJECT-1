@@ -71,10 +71,12 @@ export default function LoginForm() {
         <p className="mt-1 text-sm text-secondary">Sign in to continue learning</p>
       </div>
       <Toast message={errors.submit} tone="danger" className="mb-4" />
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-5" aria-label="Sign in form">
         <IconField icon="👤">
           <Input
             label="Phone Number or Email"
+            name="identifier"
+            autoComplete="username"
             value={formData.identifier}
             onChange={(e) => handleInputChange('identifier', e.target.value)}
             error={errors.identifier}
@@ -87,6 +89,8 @@ export default function LoginForm() {
         <IconField icon="🔒">
           <Input
             label="Password"
+            name="password"
+            autoComplete="current-password"
             type="password"
             value={formData.password}
             onChange={(e) => handleInputChange('password', e.target.value)}

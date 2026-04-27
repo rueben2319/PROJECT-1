@@ -64,8 +64,8 @@ export default function OTPInput({ length = 6, onComplete, onResend, disabled = 
   }
 
   return (
-    <div className="mx-auto w-full max-w-sm">
-      <div className="mb-2 text-center text-xs uppercase tracking-wide text-muted">Verification code</div>
+    <fieldset className="mx-auto w-full max-w-sm" aria-label="One-time password verification">
+      <legend className="mb-2 w-full text-center text-xs uppercase tracking-wide text-muted">Verification code</legend>
       <div className="mb-6 flex justify-center gap-2">
         {otp.map((digit, index) => (
           <input
@@ -80,26 +80,26 @@ export default function OTPInput({ length = 6, onComplete, onResend, disabled = 
             onKeyDown={(e) => handleKeyDown(index, e)}
             onPaste={index === 0 ? handlePaste : undefined}
             disabled={disabled}
-            className="h-12 w-12 rounded-lg border-2 border-border-default text-center text-lg font-semibold transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 disabled:cursor-not-allowed disabled:bg-surface-subtle"
+            className="h-12 w-12 rounded-lg border-2 border-border-default text-center text-lg font-semibold transition-colors focus-visible:border-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed disabled:bg-surface-subtle"
             aria-label={`OTP digit ${index + 1}`}
           />
         ))}
       </div>
 
       <div className="flex flex-col items-center gap-3 text-sm">
-        <button type="button" onClick={clearOTP} disabled={disabled || !otp.some((digit) => digit)} className="text-muted transition-colors hover:text-primary disabled:cursor-not-allowed disabled:text-gray-300">Clear code</button>
+        <button type="button" onClick={clearOTP} disabled={disabled || !otp.some((digit) => digit)} className="text-muted transition-colors duration-fast hover:text-primary disabled:cursor-not-allowed disabled:text-gray-300">Clear code</button>
 
         {onResend && (
           <button
             type="button"
             onClick={handleResend}
             disabled={cooldown > 0 || disabled}
-            className="font-medium text-primary-600 transition-colors hover:text-primary-700 disabled:cursor-not-allowed disabled:text-muted"
+            className="font-medium text-primary-600 transition-colors duration-fast hover:text-primary-700 disabled:cursor-not-allowed disabled:text-muted"
           >
             {cooldown > 0 ? `Resend code in ${cooldown}s` : "Didn't receive the code? Resend"}
           </button>
         )}
       </div>
-    </div>
+    </fieldset>
   )
 }

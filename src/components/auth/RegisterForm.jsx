@@ -107,12 +107,12 @@ export default function RegisterForm() {
       <h1 className="mb-2 text-3xl font-bold text-primary">Join MSCE Learn</h1>
       <p className="mb-8 text-sm text-secondary">Start your learning journey today</p>
       <Toast message={errors.submit} tone="danger" className="mb-4" />
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <IconField icon="👤"><Input label="Full Name" value={formData.fullName} onChange={(e) => handleInputChange('fullName', e.target.value)} error={errors.fullName} hint="Use your legal or school name" className="pl-10" /></IconField>
-        <IconField icon="📱"><Input label="Phone Number" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} error={errors.phone} hint="Malawi format: 08x or 09x" className="pl-10" /></IconField>
-        <IconField icon="✉️"><Input label="Email (optional)" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} error={errors.email} hint="Optional backup for account recovery" className="pl-10" /></IconField>
-        <IconField icon="🔐"><Input label="Password" type="password" value={formData.password} onChange={(e) => handleInputChange('password', e.target.value)} error={errors.password} hint="At least 6 characters" className="pl-10" /></IconField>
-        <IconField icon="✅"><Input label="Confirm Password" type="password" value={formData.confirmPassword} onChange={(e) => handleInputChange('confirmPassword', e.target.value)} error={errors.confirmPassword} hint="Must match password" className="pl-10" /></IconField>
+      <form onSubmit={handleSubmit} className="space-y-4" aria-label="Create account form">
+        <IconField icon="👤"><Input label="Full Name" name="fullName" autoComplete="name" value={formData.fullName} onChange={(e) => handleInputChange('fullName', e.target.value)} error={errors.fullName} hint="Use your legal or school name" className="pl-10" /></IconField>
+        <IconField icon="📱"><Input label="Phone Number" name="phone" autoComplete="tel" value={formData.phone} onChange={(e) => handleInputChange('phone', e.target.value)} error={errors.phone} hint="Malawi format: 08x or 09x" className="pl-10" /></IconField>
+        <IconField icon="✉️"><Input label="Email (optional)" name="email" autoComplete="email" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} error={errors.email} hint="Optional backup for account recovery" className="pl-10" /></IconField>
+        <IconField icon="🔐"><Input label="Password" name="password" autoComplete="new-password" type="password" value={formData.password} onChange={(e) => handleInputChange('password', e.target.value)} error={errors.password} hint="At least 6 characters" className="pl-10" /></IconField>
+        <IconField icon="✅"><Input label="Confirm Password" name="confirmPassword" autoComplete="new-password" type="password" value={formData.confirmPassword} onChange={(e) => handleInputChange('confirmPassword', e.target.value)} error={errors.confirmPassword} hint="Must match password" className="pl-10" /></IconField>
         <Button type="submit" className="h-12 w-full" disabled={loading}>{loading ? 'Creating account...' : 'Create account'}</Button>
       </form>
       <p className="mt-6 text-center text-sm text-secondary">Already have an account? <Link to="/login" className="font-semibold text-primary-600">Sign in</Link></p>

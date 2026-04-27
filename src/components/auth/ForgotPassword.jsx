@@ -81,10 +81,12 @@ export default function ForgotPassword() {
       <h1 className="mb-2 text-3xl font-bold text-primary">Reset Password</h1>
       <p className="mb-8 text-sm text-secondary">Enter your phone or email to receive a reset link</p>
       <Toast message={errors.submit} tone="danger" className="mb-4" />
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-5" aria-label="Reset password form">
         <IconField icon="📨">
           <Input
             label="Phone Number or Email"
+            name="identifier"
+            autoComplete="username"
             value={formData.identifier}
             onChange={(e) => handleInputChange(e.target.value)}
             error={errors.identifier}
