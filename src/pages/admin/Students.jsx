@@ -187,7 +187,7 @@ export default function Students() {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="bg-[#111827] border border-[#1F2D45] rounded-lg p-6 animate-pulse">
               <div className="h-4 bg-gray-600 rounded w-1/2 mb-4"></div>
@@ -208,7 +208,7 @@ export default function Students() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-[#111827] border border-[#1F2D45] rounded-lg p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
@@ -357,7 +357,8 @@ export default function Students() {
         <h3 className="text-lg font-semibold text-white mb-6">Students</h3>
         
         {filteredStudents.length > 0 ? (
-          <div className="overflow-x-auto">
+          <>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-gray-400 border-b border-[#1F2D45]">
@@ -396,7 +397,7 @@ export default function Students() {
                     <td className="py-3">
                       <button
                         onClick={() => handleViewProfile(student)}
-                        className="px-3 py-1 bg-[#0F6E56]/20 text-[#0F6E56] border border-[#0F6E56]/30 rounded hover:bg-[#0F6E56]/30 transition-colors text-sm"
+                        className="touch-target min-h-[44px] px-3 py-1 bg-[#0F6E56]/20 text-[#0F6E56] border border-[#0F6E56]/30 rounded hover:bg-[#0F6E56]/30 transition-colors text-sm"
                       >
                         Profile
                       </button>
@@ -406,6 +407,31 @@ export default function Students() {
               </tbody>
             </table>
           </div>
+          <div className="md:hidden space-y-3">
+            {filteredStudents.map((student, index) => (
+              <div key={index} className="rounded-lg border border-[#1F2D45] bg-[#0A0E1A] p-4 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-white font-semibold">{student.full_name || 'Unknown'}</p>
+                    <p className="text-sm text-gray-400">{student.phone || 'N/A'}</p>
+                  </div>
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(student.status)}`}>
+                    {student.status || 'Unknown'}
+                  </span>
+                </div>
+                <div className="text-sm text-gray-300">Joined: {student.created_at ? formatDate(student.created_at) : 'N/A'}</div>
+                <div className="text-sm text-gray-300">Last Active: {student.last_active ? formatDate(student.last_active) : 'Never'}</div>
+                <div className="text-sm text-gray-300">Active Enrollments: <span className="font-mono text-white">{student.active_enrollments || 0}</span></div>
+                <button
+                  onClick={() => handleViewProfile(student)}
+                  className="touch-target mt-1 min-h-[44px] w-full rounded-lg bg-[#0F6E56]/20 px-3 py-2 text-[#0F6E56] border border-[#0F6E56]/30"
+                >
+                  View Profile
+                </button>
+              </div>
+            ))}
+          </div>
+          </>
         ) : (
           <div className="text-center py-8 text-gray-400">
             {searchTerm ? 'No students found matching your search' : 'No students found'}

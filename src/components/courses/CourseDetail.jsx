@@ -14,7 +14,7 @@ export default function CourseDetail({ course, videos = [], isEnrolled, expiresA
         <div className="mb-4 flex items-center gap-3"><Badge variant="info">{subject}</Badge><Badge variant="primary">{grade}</Badge></div>
         <h1 className="mb-3 text-3xl font-bold text-primary">{title}</h1>
         <p className="mb-5 text-secondary">{description}</p>
-        <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4"><div><p className="text-2xl font-bold text-primary">{lesson_count}</p><p className="text-sm text-secondary">Lessons</p></div><div><p className="text-2xl font-bold text-primary">{videos.filter((v) => v.completed).length}</p><p className="text-sm text-secondary">Completed</p></div></div>
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"><div><p className="text-2xl font-bold text-primary">{lesson_count}</p><p className="text-sm text-secondary">Lessons</p></div><div><p className="text-2xl font-bold text-primary">{videos.filter((v) => v.completed).length}</p><p className="text-sm text-secondary">Completed</p></div></div>
         {!isEnrolled || isExpired ? (
           <Card tone="subtle" className="flex items-center justify-between">
             <div>
