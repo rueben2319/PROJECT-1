@@ -98,7 +98,7 @@ export default function OTPInput({ length = 6, onComplete, onResend, disabled = 
             onKeyDown={e => handleKeyDown(index, e)}
             onPaste={index === 0 ? handlePaste : undefined}
             disabled={disabled}
-            className="w-12 h-12 text-center text-lg font-semibold border-2 border-gray-300 rounded-lg focus:border-primary-600 focus:ring-2 focus:ring-primary-200 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="w-12 h-12 text-center text-lg font-semibold border-2 border-border-default rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-200 focus:outline-none transition-colors disabled:bg-surface-subtle disabled:cursor-not-allowed"
             aria-label={`OTP digit ${index + 1}`}
           />
         ))}
@@ -109,7 +109,7 @@ export default function OTPInput({ length = 6, onComplete, onResend, disabled = 
           type="button"
           onClick={clearOTP}
           disabled={disabled || !otp.some(digit => digit)}
-          className="text-sm text-gray-500 hover:text-gray-700 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
+          className="text-sm text-muted hover:text-primary disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
         >
           Clear code
         </button>
@@ -119,7 +119,7 @@ export default function OTPInput({ length = 6, onComplete, onResend, disabled = 
             type="button"
             onClick={handleResend}
             disabled={cooldown > 0 || disabled}
-            className="text-sm font-medium text-primary-600 hover:text-primary-700 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="text-sm font-medium text-primary-600 hover:text-primary-700 disabled:text-muted disabled:cursor-not-allowed transition-colors"
           >
             {cooldown > 0 
               ? `Resend code in ${cooldown}s` 
